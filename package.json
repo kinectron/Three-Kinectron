@@ -1,0 +1,38 @@
+{
+  "name": "kinectron-for-threejs",
+  "version": "0.0.1",
+  "description": "A Three.js helper library for rendering Kinectron feeds using Three.js",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "concurrently \"http-server -s --cors\" \"watchify src/index.js -o dist/three.kinectron.js -v\"",
+    "build": "browserify src/index.js | uglifyjs -mc warnings=false > dist/three.kinectron.min.js",
+    "test": "npm run build"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babelify": "^8.0.0",
+    "browserify": "^15.0.0",
+    "concurrently": "^3.5.1",
+    "glslify": "^6.1.0",
+    "http-server": "^0.10.0",
+    "uglify-js": "^3.3.4",
+    "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "three": "^0.89.0"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "env"
+          ]
+        }
+      ],
+      "glslify"
+    ]
+  }
+}
