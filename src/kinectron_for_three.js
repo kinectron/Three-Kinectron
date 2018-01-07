@@ -6,8 +6,8 @@
 const glsl = require('glslify');
 
 //Precision params for the geometry
-const VERTS_WIDE = 256;
-const VERTS_TALL = 256;
+const VERTS_WIDE = 512;
+const VERTS_TALL = 424;
 
 export default class KinectGeometry {
 
@@ -26,16 +26,21 @@ export default class KinectGeometry {
     //Create the material
     this.material = new THREE.ShaderMaterial({
       uniforms: {
-        isPoints:{
+        isPoints: {
           type: "b",
           value: false
+        },
+        depthMap: {
+          type: "t",
+          value: null
         }
       },
       vertexShader: kinectronVert,
       fragmentShader: kinectronFrag,
-      transparent: true,
-      side: THREE.DoubleSided
+      transparent: true
     });
+
+    this.material.side = THREE.DoubleSided;
 
     //Switch a few things based on selected rendering type and create the mesh
     switch (_type) {
@@ -54,12 +59,44 @@ export default class KinectGeometry {
         break;
     }
 
+    //Translate the origin point to the new center of the Object (i.e center of mass)
+    this.mesh.applyMatrix( new THREE.Matrix4().makeTranslation(-1.3,1.3,0));
+
+    // instantiate a loader
+    // var loader = new THREE.TextureLoader();
+    // let instancedMesh = this.mesh;
+    // // load a resource
+    // loader.load(
+    // 	// resource URL
+    // 	'../assets/Chae_Demo_Upres.png',
+    //
+    // 	// onLoad callback
+    // 	function ( texture ) {
+    // 		  instancedMesh.material.uniforms.depthMap.value = texture;
+    // 	},
+    //
+    // 	// onProgress callback currently not supported
+    // 	undefined,
+    //
+    // 	// onError callback
+    // 	function ( err ) {
+    // 		console.error( 'An error happened.' );
+    // 	}
+    // );
+
+    //Expose the class as an object inside the THREE Object3D
+    this.mesh.kinectron = this;
+
+    //Return the THREE Object3D instance for the mesh so you can just 'scene.add()' it
+    return this.mesh
+
   }
 
   //A utility method to build a fully tesselated plane geometry
   static buildGeomtery() {
 
-    KinectGeometry.geo = new THREE.BufferGeometry();
+    KinectGeometry.geo = new THREE.Geometry();
+    KinectGeometry.geo.uvsNeedUpdate = true;
 
     for (let y = 0; y < VERTS_TALL; y++) {
       for (let x = 0; x < VERTS_WIDE; x++) {

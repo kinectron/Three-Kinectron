@@ -43,8 +43,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var glsl = require('glslify');
 
 //Precision params for the geometry
-var VERTS_WIDE = 256;
-var VERTS_TALL = 256;
+var VERTS_WIDE = 512;
+var VERTS_TALL = 424;
 
 var KinectGeometry = function () {
   function KinectGeometry() {
@@ -53,8 +53,8 @@ var KinectGeometry = function () {
     _classCallCheck(this, KinectGeometry);
 
     //Load the shaders
-    var kinectronFrag = glsl(["#define GLSLIFY 1\n\n//Interpolated per fragment values\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vPos;\n\nvoid main() {\n\n    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);\n\n    gl_FragColor = color;\n\n}\n"]);
-    var kinectronVert = glsl(["#define GLSLIFY 1\nuniform bool isPoints;\n\nvoid main() {\n\n    if(isPoints){\n        gl_PointSize = 1.0;\n    }\n\n    gl_Position = projectionMatrix * modelViewMatrix * position;\n}\n"]);
+    var kinectronFrag = glsl(["#define GLSLIFY 1\n\n// Texture maps\nuniform sampler2D depthMap;\n\n//Interpolated per fragment values\nvarying vec2 vUv;\n// varying vec3 vNormal;\n// varying vec3 vPos;\n\nvoid main() {\n\n    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);\n\n    gl_FragColor = texture2D(depthMap, vUv);\n\n}\n"]);
+    var kinectronVert = glsl(["#define GLSLIFY 1\n// State uniforms\nuniform bool isPoints;\n\n// Texture maps\nuniform sampler2D depthMap;\n\n//Per vertex interpolation passed to the fragment shader\nvarying vec2 vUv;\n\nvoid main() {\n\n    vUv = uv;\n\n    vec3 pos = position;\n\n    vec4 texelRead = texture2D(depthMap, uv);\n\n    pos.z = texelRead.r;\n\n    if(isPoints){\n        gl_PointSize = 1.0;\n    }\n\n    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);\n\n}\n"]);
 
     //Build the geometry but only once! even for multipule instances
     if (!KinectGeometry.geo) {
@@ -67,13 +67,18 @@ var KinectGeometry = function () {
         isPoints: {
           type: "b",
           value: false
+        },
+        depthMap: {
+          type: "t",
+          value: null
         }
       },
       vertexShader: kinectronVert,
       fragmentShader: kinectronFrag,
-      transparent: true,
-      side: THREE.DoubleSided
+      transparent: true
     });
+
+    this.material.side = THREE.DoubleSided;
 
     //Switch a few things based on selected rendering type and create the mesh
     switch (_type) {
@@ -91,6 +96,37 @@ var KinectGeometry = function () {
         this.mesh = new THREE.Mesh(KinectGeometry.geo, this.material);
         break;
     }
+
+    //Translate the origin point to the new center of the Object (i.e center of mass)
+    this.mesh.applyMatrix(new THREE.Matrix4().makeTranslation(-1.3, 1.3, 0));
+
+    // instantiate a loader
+    // var loader = new THREE.TextureLoader();
+    // let instancedMesh = this.mesh;
+    // // load a resource
+    // loader.load(
+    // 	// resource URL
+    // 	'../assets/Chae_Demo_Upres.png',
+    //
+    // 	// onLoad callback
+    // 	function ( texture ) {
+    // 		  instancedMesh.material.uniforms.depthMap.value = texture;
+    // 	},
+    //
+    // 	// onProgress callback currently not supported
+    // 	undefined,
+    //
+    // 	// onError callback
+    // 	function ( err ) {
+    // 		console.error( 'An error happened.' );
+    // 	}
+    // );
+
+    //Expose the class as an object inside the THREE Object3D
+    this.mesh.kinectron = this;
+
+    //Return the THREE Object3D instance for the mesh so you can just 'scene.add()' it
+    return this.mesh;
   }
 
   //A utility method to build a fully tesselated plane geometry
@@ -100,7 +136,8 @@ var KinectGeometry = function () {
     key: 'buildGeomtery',
     value: function buildGeomtery() {
 
-      KinectGeometry.geo = new THREE.BufferGeometry();
+      KinectGeometry.geo = new THREE.Geometry();
+      KinectGeometry.geo.uvsNeedUpdate = true;
 
       for (var y = 0; y < VERTS_TALL; y++) {
         for (var x = 0; x < VERTS_WIDE; x++) {
