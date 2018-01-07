@@ -1,4 +1,4 @@
-{
+const KinectParams = {
   "v2":{
     "cx": 254.878,
     "cy": 205.395,
@@ -11,3 +11,5 @@
     "p2": 0.0
   }
 }
+
+export default KinectParams;

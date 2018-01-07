@@ -11,6 +11,28 @@ module.exports = function(strings) {
 }
 
 },{}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var KinectParams = {
+  "v2": {
+    "cx": 254.878,
+    "cy": 205.395,
+    "fx": 365.456,
+    "fy": 365.456,
+    "k1": 0.0905474,
+    "k2": -0.26819,
+    "k3": 0.0950862,
+    "p1": 0.0,
+    "p2": 0.0
+  }
+};
+
+exports.default = KinectParams;
+
+},{}],3:[function(require,module,exports){
 'use strict';
 
 var _kinectron_for_three = require('./kinectron_for_three');
@@ -26,17 +48,25 @@ if (THREE) {
   console.log('Three.js was not found, perhaps you forgot to include it?');
 } //Import the class
 
-},{"./kinectron_for_three":3}],3:[function(require,module,exports){
+},{"./kinectron_for_three":4}],4:[function(require,module,exports){
 'use strict';
 
 //Only for debugging, make sure to comment out for production
 // import * as THREE from 'three'
+
+// Static camera parameters
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _KinectParams = require('./KinectParams');
+
+var _KinectParams2 = _interopRequireDefault(_KinectParams);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -53,14 +83,14 @@ var KinectGeometry = function () {
     _classCallCheck(this, KinectGeometry);
 
     //Load the shaders
-    var kinectronFrag = glsl(["#define GLSLIFY 1\n\n// Texture maps\nuniform sampler2D depthMap;\n\n//Interpolated per fragment values\nvarying vec2 vUv;\n// varying vec3 vNormal;\n// varying vec3 vPos;\n\nvoid main() {\n\n    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);\n\n    gl_FragColor = texture2D(depthMap, vUv);\n\n}\n"]);
-    var kinectronVert = glsl(["#define GLSLIFY 1\n// State uniforms\nuniform bool isPoints;\n\n// Texture maps\nuniform sampler2D depthMap;\n\n//Per vertex interpolation passed to the fragment shader\nvarying vec2 vUv;\n\nvoid main() {\n\n    vUv = uv;\n\n    vec3 pos = position;\n\n    vec4 texelRead = texture2D(depthMap, uv);\n\n    pos.z = texelRead.r;\n\n    if(isPoints){\n        gl_PointSize = 1.0;\n    }\n\n    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);\n\n}\n"]);
+    var kinectronFrag = glsl(["#define GLSLIFY 1\n// Texture maps\nuniform sampler2D depthMap;\n\n//Interpolated per fragment values\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vPos;\n\nvoid main() {\n\n    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);\n\n    gl_FragColor = texture2D(depthMap, vUv);\n\n}\n"]);
+    var kinectronVert = glsl(["#define GLSLIFY 1\n// Uniforms\nuniform bool isPoints;\nuniform vec2 texSize;\n\n//Kinect params\nuniform float fx;\nuniform float fy;\nuniform float cx;\nuniform float cy;\n\n// Texture maps\nuniform sampler2D depthMap;\n\n//Per vertex interpolation passed to the fragment shader\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vPos;\n\nvoid main() {\n\n    vUv = uv;\n    vPos = (modelMatrix * vec4(position, 1.0 )).xyz;\n    vNormal = normalMatrix * normal;\n\n    //Read the depth map\n    vec4 texelRead = texture2D(depthMap, uv);\n\n    //Calculate the positions\n    vec4 pos = vec4(position.x, position.y, texelRead.r, 1.0);\n\n    if(isPoints){\n        gl_PointSize = 1.0;\n    }\n\n    gl_Position = projectionMatrix * modelViewMatrix * pos;\n\n}\n"]);
 
     //Build the geometry but only once! even for multipule instances
     if (!KinectGeometry.geo) {
       KinectGeometry.buildGeomtery();
     }
-
+    console.log(_KinectParams2.default.v2.fx, _KinectParams2.default.v2.fy);
     //Create the material
     this.material = new THREE.ShaderMaterial({
       uniforms: {
@@ -71,6 +101,26 @@ var KinectGeometry = function () {
         depthMap: {
           type: "t",
           value: null
+        },
+        texSize: {
+          type: "vec2",
+          value: new THREE.Vector2(0, 0)
+        },
+        fx: {
+          type: "f",
+          value: _KinectParams2.default.v2.fx
+        },
+        fy: {
+          type: "f",
+          value: _KinectParams2.default.v2.fy
+        },
+        cx: {
+          type: "f",
+          value: _KinectParams2.default.v2.cx
+        },
+        cy: {
+          type: "f",
+          value: _KinectParams2.default.v2.cy
         }
       },
       vertexShader: kinectronVert,
@@ -78,7 +128,8 @@ var KinectGeometry = function () {
       transparent: true
     });
 
-    this.material.side = THREE.DoubleSided;
+    //Make the shader material double sided
+    this.material.side = THREE.DoubleSide;
 
     //Switch a few things based on selected rendering type and create the mesh
     switch (_type) {
@@ -97,30 +148,13 @@ var KinectGeometry = function () {
         break;
     }
 
-    //Translate the origin point to the new center of the Object (i.e center of mass)
-    this.mesh.applyMatrix(new THREE.Matrix4().makeTranslation(-1.3, 1.3, 0));
-
-    // instantiate a loader
-    // var loader = new THREE.TextureLoader();
-    // let instancedMesh = this.mesh;
-    // // load a resource
-    // loader.load(
-    // 	// resource URL
-    // 	'../assets/Chae_Demo_Upres.png',
-    //
-    // 	// onLoad callback
-    // 	function ( texture ) {
-    // 		  instancedMesh.material.uniforms.depthMap.value = texture;
-    // 	},
-    //
-    // 	// onProgress callback currently not supported
-    // 	undefined,
-    //
-    // 	// onError callback
-    // 	function ( err ) {
-    // 		console.error( 'An error happened.' );
-    // 	}
-    // );
+    var loader = new THREE.TextureLoader();
+    //Hack around scope issue
+    var me = this;
+    loader.load('../assets/depth.jpg', function (texture) {
+      me.material.uniforms.depthMap.value = texture;
+      me.material.uniforms.texSize.value = new THREE.Vector2(texture.width, texture.height);
+    });
 
     //Expose the class as an object inside the THREE Object3D
     this.mesh.kinectron = this;
@@ -135,21 +169,7 @@ var KinectGeometry = function () {
   _createClass(KinectGeometry, null, [{
     key: 'buildGeomtery',
     value: function buildGeomtery() {
-
-      KinectGeometry.geo = new THREE.Geometry();
-      KinectGeometry.geo.uvsNeedUpdate = true;
-
-      for (var y = 0; y < VERTS_TALL; y++) {
-        for (var x = 0; x < VERTS_WIDE; x++) {
-          KinectGeometry.geo.vertices.push(new THREE.Vector3(-640 + x * 5, 480 - y * 5, 0));
-        }
-      }
-      for (var _y = 0; _y < VERTS_TALL - 1; _y++) {
-        for (var _x2 = 0; _x2 < VERTS_WIDE - 1; _x2++) {
-          KinectGeometry.geo.faces.push(new THREE.Face3(_x2 + _y * VERTS_WIDE, _x2 + (_y + 1) * VERTS_WIDE, _x2 + 1 + _y * VERTS_WIDE));
-          KinectGeometry.geo.faces.push(new THREE.Face3(_x2 + 1 + _y * VERTS_WIDE, _x2 + (_y + 1) * VERTS_WIDE, _x2 + 1 + (_y + 1) * VERTS_WIDE));
-        }
-      }
+      KinectGeometry.geo = new THREE.PlaneBufferGeometry(5, 4, VERTS_WIDE, VERTS_TALL);
     }
   }]);
 
@@ -158,4 +178,4 @@ var KinectGeometry = function () {
 
 exports.default = KinectGeometry;
 
-},{"glslify":1}]},{},[2]);
+},{"./KinectParams":2,"glslify":1}]},{},[3]);

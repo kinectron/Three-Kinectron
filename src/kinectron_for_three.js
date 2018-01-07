@@ -3,6 +3,9 @@
 //Only for debugging, make sure to comment out for production
 // import * as THREE from 'three'
 
+// Static camera parameters
+import KinectParams from './KinectParams';
+
 const glsl = require('glslify');
 
 //Precision params for the geometry
@@ -22,7 +25,7 @@ export default class KinectGeometry {
     if (!KinectGeometry.geo) {
       KinectGeometry.buildGeomtery();
     }
-
+    console.log(KinectParams.v2.fx, KinectParams.v2.fy);
     //Create the material
     this.material = new THREE.ShaderMaterial({
       uniforms: {
@@ -33,6 +36,26 @@ export default class KinectGeometry {
         depthMap: {
           type: "t",
           value: null
+        },
+        texSize: {
+          type: "vec2",
+          value: new THREE.Vector2(0,0)
+        },
+        fx: {
+          type: "f",
+          value: KinectParams.v2.fx
+        },
+        fy: {
+          type: "f",
+          value: KinectParams.v2.fy
+        },
+        cx: {
+          type: "f",
+          value: KinectParams.v2.cx
+        },
+        cy: {
+          type: "f",
+          value: KinectParams.v2.cy
         }
       },
       vertexShader: kinectronVert,
@@ -40,7 +63,8 @@ export default class KinectGeometry {
       transparent: true
     });
 
-    this.material.side = THREE.DoubleSided;
+    //Make the shader material double sided
+    this.material.side = THREE.DoubleSide;
 
     //Switch a few things based on selected rendering type and create the mesh
     switch (_type) {
@@ -59,30 +83,13 @@ export default class KinectGeometry {
         break;
     }
 
-    //Translate the origin point to the new center of the Object (i.e center of mass)
-    this.mesh.applyMatrix( new THREE.Matrix4().makeTranslation(-1.3,1.3,0));
-
-    // instantiate a loader
-    // var loader = new THREE.TextureLoader();
-    // let instancedMesh = this.mesh;
-    // // load a resource
-    // loader.load(
-    // 	// resource URL
-    // 	'../assets/Chae_Demo_Upres.png',
-    //
-    // 	// onLoad callback
-    // 	function ( texture ) {
-    // 		  instancedMesh.material.uniforms.depthMap.value = texture;
-    // 	},
-    //
-    // 	// onProgress callback currently not supported
-    // 	undefined,
-    //
-    // 	// onError callback
-    // 	function ( err ) {
-    // 		console.error( 'An error happened.' );
-    // 	}
-    // );
+    var loader = new THREE.TextureLoader();
+    //Hack around scope issue
+    const me = this;
+    loader.load('../assets/depth.jpg', function(texture){
+      me.material.uniforms.depthMap.value = texture;
+      me.material.uniforms.texSize.value = new THREE.Vector2(texture.width, texture.height);
+    });
 
     //Expose the class as an object inside the THREE Object3D
     this.mesh.kinectron = this;
@@ -94,31 +101,6 @@ export default class KinectGeometry {
 
   //A utility method to build a fully tesselated plane geometry
   static buildGeomtery() {
-
-    KinectGeometry.geo = new THREE.Geometry();
-    KinectGeometry.geo.uvsNeedUpdate = true;
-
-    for (let y = 0; y < VERTS_TALL; y++) {
-      for (let x = 0; x < VERTS_WIDE; x++) {
-        KinectGeometry.geo.vertices.push(
-          new THREE.Vector3((-640 + x * 5), (480 - y * 5), 0));
-      }
+        KinectGeometry.geo = new THREE.PlaneBufferGeometry( 5,4, VERTS_WIDE, VERTS_TALL );
     }
-    for (let y = 0; y < VERTS_TALL - 1; y++) {
-      for (let x = 0; x < VERTS_WIDE - 1; x++) {
-        KinectGeometry.geo.faces.push(
-          new THREE.Face3(
-            x + y * VERTS_WIDE,
-            x + (y + 1) * VERTS_WIDE,
-            (x + 1) + y * (VERTS_WIDE)
-          ));
-        KinectGeometry.geo.faces.push(
-          new THREE.Face3(
-            x + 1 + y * VERTS_WIDE,
-            x + (y + 1) * VERTS_WIDE,
-            (x + 1) + (y + 1) * (VERTS_WIDE)
-          ));
-      }
-    }
-  }
 }

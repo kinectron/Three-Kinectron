@@ -1,12 +1,11 @@
 
-
 // Texture maps
 uniform sampler2D depthMap;
 
 //Interpolated per fragment values
 varying vec2 vUv;
-// varying vec3 vNormal;
-// varying vec3 vPos;
+varying vec3 vNormal;
+varying vec3 vPos;
 
 void main() {
 
