@@ -8,9 +8,15 @@ A plugin for working with [Kinectron](https://github.com/kinectron/kinectron) st
 ## Usage
 You can create geomtery from the Kinect's depth feed by simply:
 ```js
-var kinectGeo = THREE.KinectronGeometry("points");
+var kinectGeo = THREE.KinectronGeometry("mesh");
 ```
 You can choose the rendering type by changing the first argument to ```"mesh" / "wire" / "points"```
+
+And then simply add it your Three.js scene:
+```js
+scene.add(kinectGeo);
+```
+
 ## Contribute
 Fork/Clone the repository and ```npm install``` all dependencies
 ### Build system commands:
