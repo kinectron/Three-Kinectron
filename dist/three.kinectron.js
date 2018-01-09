@@ -11,6 +11,22 @@ module.exports = function(strings) {
 }
 
 },{}],2:[function(require,module,exports){
+'use strict';
+
+var _kinectronForThree = require('./kinectronForThree');
+
+var _kinectronForThree2 = _interopRequireDefault(_kinectronForThree);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//If three.js is in the global scope attach it
+if (THREE) {
+  THREE.KinectGeometry = _kinectronForThree2.default;
+} else {
+  console.log('Three.js was not found, perhaps you forgot to include it?');
+} //Import the class
+
+},{"./kinectronForThree":4}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32,29 +48,11 @@ var KinectParams = {
 
 exports.default = KinectParams;
 
-},{}],3:[function(require,module,exports){
-'use strict';
-
-var _kinectron_for_three = require('./kinectron_for_three');
-
-var _kinectron_for_three2 = _interopRequireDefault(_kinectron_for_three);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//If three.js is in the global scope attach it
-if (THREE) {
-  THREE.KinectGeometry = _kinectron_for_three2.default;
-} else {
-  console.log('Three.js was not found, perhaps you forgot to include it?');
-} //Import the class
-
-},{"./kinectron_for_three":4}],4:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 //Only for debugging, make sure to comment out for production
 // import * as THREE from 'three'
-
-// Static camera parameters
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -62,9 +60,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _KinectParams = require('./KinectParams');
+var _shaderParams = require('./shaderParams');
 
-var _KinectParams2 = _interopRequireDefault(_KinectParams);
+var _shaderParams2 = _interopRequireDefault(_shaderParams);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -72,13 +70,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var glsl = require('glslify');
 
-//Precision params for the geometry
-var VERTS_WIDE = 512;
-var VERTS_TALL = 424;
-
 var KinectGeometry = function () {
   function KinectGeometry() {
     var _type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'mesh';
+
+    var _this = this;
+
+    var vertsWide = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 512;
+    var vertsTall = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 424;
 
     _classCallCheck(this, KinectGeometry);
 
@@ -88,41 +87,12 @@ var KinectGeometry = function () {
 
     //Build the geometry but only once! even for multipule instances
     if (!KinectGeometry.geo) {
-      KinectGeometry.buildGeomtery();
+      KinectGeometry.buildGeomtery(vertsWide, vertsTall);
     }
-    console.log(_KinectParams2.default.v2.fx, _KinectParams2.default.v2.fy);
+
     //Create the material
     this.material = new THREE.ShaderMaterial({
-      uniforms: {
-        isPoints: {
-          type: "b",
-          value: false
-        },
-        depthMap: {
-          type: "t",
-          value: null
-        },
-        texSize: {
-          type: "vec2",
-          value: new THREE.Vector2(0, 0)
-        },
-        fx: {
-          type: "f",
-          value: _KinectParams2.default.v2.fx
-        },
-        fy: {
-          type: "f",
-          value: _KinectParams2.default.v2.fy
-        },
-        cx: {
-          type: "f",
-          value: _KinectParams2.default.v2.cx
-        },
-        cy: {
-          type: "f",
-          value: _KinectParams2.default.v2.cy
-        }
-      },
+      uniforms: _shaderParams2.default,
       vertexShader: kinectronVert,
       fragmentShader: kinectronFrag,
       transparent: true
@@ -132,29 +102,22 @@ var KinectGeometry = function () {
     this.material.side = THREE.DoubleSide;
 
     //Switch a few things based on selected rendering type and create the mesh
-    switch (_type) {
-      case 'wire':
-        this.material.wireframe = true;
-        this.mesh = new THREE.Mesh(KinectGeometry.geo, this.material);
-        break;
-
-      case 'points':
-        this.material.uniforms.isPoints.value = true;
-        this.mesh = new THREE.Points(KinectGeometry.geo, this.material);
-        break;
-
-      default:
-        this.mesh = new THREE.Mesh(KinectGeometry.geo, this.material);
-        break;
-    }
+    this.buildMesh(_type);
 
     var loader = new THREE.TextureLoader();
-    //Hack around scope issue
-    var me = this;
-    loader.load('../assets/depth.jpg', function (texture) {
-      me.material.uniforms.depthMap.value = texture;
-      me.material.uniforms.texSize.value = new THREE.Vector2(texture.width, texture.height);
+
+    loader.load('../assets/test.jpg', function (texture) {
+
+      //Filter the texture
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+
+      _this.material.uniforms.depthMap.value = texture;
+      _this.material.uniforms.texSize.value = new THREE.Vector2(texture.width, texture.height);
     });
+
+    //Setup a three clock in case we need time in our shaders - get's updated only if update() is called recursively
+    this.clock = new THREE.Clock();
 
     //Expose the class as an object inside the THREE Object3D
     this.mesh.kinectron = this;
@@ -163,12 +126,44 @@ var KinectGeometry = function () {
     return this.mesh;
   }
 
-  //A utility method to build a fully tesselated plane geometry
+  /***************
+   * Class methods
+   ***************/
+
+  //Change rendering type
 
 
-  _createClass(KinectGeometry, null, [{
+  _createClass(KinectGeometry, [{
+    key: 'buildMesh',
+    value: function buildMesh(type) {
+      //Switch a few things based on selected rendering type and create the mesh
+      switch (type) {
+        case 'wire':
+          this.material.wireframe = true;
+          this.mesh = new THREE.Mesh(KinectGeometry.geo, this.material);
+          break;
+
+        case 'points':
+          this.material.uniforms.isPoints.value = true;
+          this.mesh = new THREE.Points(KinectGeometry.geo, this.material);
+          break;
+
+        default:
+          this.mesh = new THREE.Mesh(KinectGeometry.geo, this.material);
+          break;
+      }
+    }
+
+    //A utility method to build a fully tesselated plane geometry
+
+  }, {
+    key: 'update',
+    value: function update() {
+      this.mesh.material.uniforms.time.value = this.clock.getElapsedTime();
+    }
+  }], [{
     key: 'buildGeomtery',
-    value: function buildGeomtery() {
+    value: function buildGeomtery(VERTS_WIDE, VERTS_TALL) {
       KinectGeometry.geo = new THREE.PlaneBufferGeometry(5, 4, VERTS_WIDE, VERTS_TALL);
     }
   }]);
@@ -178,4 +173,50 @@ var KinectGeometry = function () {
 
 exports.default = KinectGeometry;
 
-},{"./KinectParams":2,"glslify":1}]},{},[3]);
+},{"./shaderParams":5,"glslify":1}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _kinectParams = require("./kinectParams");
+
+var _kinectParams2 = _interopRequireDefault(_kinectParams);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var ShaderParams = {
+  isPoints: {
+    type: "b",
+    value: false
+  },
+  depthMap: {
+    type: "t",
+    value: null
+  },
+  texSize: {
+    type: "vec2",
+    value: new THREE.Vector2(0, 0)
+  },
+  fx: {
+    type: "f",
+    value: _kinectParams2.default.v2.fx
+  },
+  fy: {
+    type: "f",
+    value: _kinectParams2.default.v2.fy
+  },
+  cx: {
+    type: "f",
+    value: _kinectParams2.default.v2.cx
+  },
+  cy: {
+    type: "f",
+    value: _kinectParams2.default.v2.cy
+  }
+};
+
+exports.default = ShaderParams;
+
+},{"./kinectParams":3}]},{},[2]);

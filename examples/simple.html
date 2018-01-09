@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>DepthKit - Simple example using Three.js</title>
+	<title>Kinectron For Three.js - Simple Example</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<!-- Origin Trial Token, feature = WebVR (For Chrome M59+), origin = https://juniorxsound.github.io, expires = 2017-08-16 -->
@@ -52,10 +52,10 @@
 
 			// Setup camera
 			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .1, 500);
-			camera.position.set(0, 1, 10);
+			camera.position.set(-8, 1, 10);
       camera.lookAt(new THREE.Vector3(0,0,0));
 
-      //Create a kinectron geometry instance
+      //Create a kinectron geometry instance - First argument takes the rendering type ("wire" / "points" / "mesh")
       var kinectronGeo = new THREE.KinectGeometry('wire');
 
       //Add it to the scene
