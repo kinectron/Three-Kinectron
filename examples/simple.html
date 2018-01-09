@@ -52,11 +52,11 @@
 
 			// Setup camera
 			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .1, 500);
-			camera.position.set(-8, 1, 10);
+			camera.position.set(-4, 2, 7);
       camera.lookAt(new THREE.Vector3(0,0,0));
 
       //Create a kinectron geometry instance - First argument takes the rendering type ("wire" / "points" / "mesh")
-      var kinectronGeo = new THREE.KinectGeometry('wire');
+      var kinectronGeo = new THREE.KinectGeometry('mesh');
 
       //Add it to the scene
       scene.add(kinectronGeo);
