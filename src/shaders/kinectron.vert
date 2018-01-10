@@ -27,7 +27,7 @@ void main() {
     vec4 texelRead = texture2D(depthMap, uv);
 
     //Calculate the positions
-    vec4 pos = vec4(position.x, position.y, texelRead.r, 1.0);
+    vec4 pos = vec4(position.x, position.y, texelRead.a, 1.0);
 
     if(isPoints){
         gl_PointSize = 1.0;

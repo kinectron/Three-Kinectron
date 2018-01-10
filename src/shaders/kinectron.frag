@@ -12,6 +12,8 @@ void main() {
 
     vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
 
-    gl_FragColor = texture2D(depthMap, vUv);
+    vec4 texelRead = texture2D(depthMap, vUv);
+
+    gl_FragColor = vec4(texelRead.rgb, 1.0);
 
 }

@@ -4,6 +4,7 @@
 // import * as THREE from 'three'
 
 import ShaderParams from './shaderParams';
+import testImage from './test/image_webp1';
 
 const glsl = require('glslify');
 
@@ -37,17 +38,8 @@ export default class KinectGeometry {
     //Switch a few things based on selected rendering type and create the mesh
     this.buildMesh(_type);
 
-    var loader = new THREE.TextureLoader();
-
-    loader.load('../assets/test.jpg', texture => {
-
-      //Filter the texture
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-
-      this.material.uniforms.depthMap.value = texture;
-      this.material.uniforms.texSize.value = new THREE.Vector2(texture.width, texture.height);
-    });
+    //Feed the stream and create a THREE.texture
+    this.createTexture(testImage);
 
     //Setup a three clock in case we need time in our shaders - get's updated only if update() is called recursively
     this.clock = new THREE.Clock();
@@ -91,5 +83,36 @@ export default class KinectGeometry {
 
   update() {
     this.mesh.material.uniforms.time.value = this.clock.getElapsedTime();
+  }
+
+  createTexture(imageStream){
+
+    //Create an image element
+    const toImage = new Image();
+    toImage.src = imageStream;
+
+    //Image has loaded
+    toImage.onload = ()=>{
+      
+      //Create a three texture out of the image element
+      const texture = new THREE.Texture(toImage);
+
+      //Make sure to set update to true!
+      texture.needsUpdate = true;
+
+      //Filter the texture
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+
+      //Format and type
+      texture.format = THREE.RGBAFormat;
+
+      //Assign it to the shader program
+      this.material.uniforms.depthMap.value = texture;
+      this.material.uniforms.texSize.value = new THREE.Vector2(texture.width, texture.height);
+
+      console.log("Texture set", texture);
+    }
+
   }
 }
