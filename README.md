@@ -17,6 +17,24 @@ And then simply add it your Three.js scene:
 scene.add(kinectGeo);
 ```
 
+### Class methods:
+- ```kinectGeo.setDisplacement(amount)``` - Increase or decrease the amount of displacement on the Z axis (Default value is 1.0).
+- ```kinectGeo.setBrightness(amount)``` - Increase or decrease the brightness of the texture (Default value is 0.0).
+- ```kinectGeo.setContrast(amount)``` - Increase or decrease the contrast of the texture (Default value is 1.0).
+- ```kinectGeo.setOpacity(opacity)``` - Increase or decrease the opacity of the texture (Default value is 1.0).
+- ```kinectGeo.setPointSize(opacity)``` - Increase or decrease the point size (Only when rendering points, "points").
+- ```kinectGeo.setLineWidth(width)``` - Increase or decrease the line width (Only when rendering wireframe, "wire").
+- ```kinectGeo.pause()``` - Pause the rendering of the Kinectron stream, keeps the last frame.
+- ```kinectGeo.play()``` - Resume the rendering of the Kinectron stream.
+- ```kinectGeo.bind(imageStream)``` - Bind a Kinectron image stream to the material, needs to be called everytime a new frame arrives.
+- ```kinectGeo.update()``` - Calling the update method in the render loop will update the time uniform in the shader.
+
+
+
+
+
+
+
 ## Contribute
 Fork/Clone the repository and ```npm install``` all dependencies
 ### Build system commands:
