@@ -17,6 +17,7 @@
 			font-family: georgia;
 			text-align: center;
 		}
+
 		a {
 			color: skyblue;
 			text-decoration: none
@@ -26,8 +27,9 @@
 
 <body>
 
-	<!--Three.js-->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.min.js"></script>
+	<!--Three.js - TODO - swap with hosted versions so example serve from Github pages-->
+	<script src="../node_modules/three/build/three.min.js"></script>
+	<script src="../node_modules/three/examples/js/controls/OrbitControls.js"></script>
 
 	<!--DepthKit.js-->
 	<script src="../dist/three.kinectron.js"></script>
@@ -35,12 +37,16 @@
 	<script>
 		//Some general Three.js components
 		var renderer,
-			scene,
-			camera,
-			controls;
+				scene,
+				camera,
+				controls;
+
 		//DepthKit character
 		var character;
-		init();
+
+		//Kick off the example
+		window.onload = function(){ init(); }
+
 		function init() {
 			//Setup renderer
 			renderer = new THREE.WebGLRenderer();
@@ -53,13 +59,16 @@
 			// Setup camera
 			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .1, 500);
 			camera.position.set(-4, 2, 7);
-      camera.lookAt(new THREE.Vector3(0,0,0));
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-      //Create a kinectron geometry instance - First argument takes the rendering type ("wire" / "points" / "mesh")
-      var kinectronGeo = new THREE.KinectGeometry('mesh');
+			//Create a kinectron geometry instance - First argument takes the rendering type ("wire" / "points" / "mesh")
+			var kinectronGeo = new THREE.KinectGeometry('mesh');
 
-      //Add it to the scene
-      scene.add(kinectronGeo);
+			//Add it to the scene
+			scene.add(kinectronGeo);
+
+			//Create mouse OrbitControls
+			controls = new THREE.OrbitControls(camera);
 
 			// A grid helper as a floor reference
 			var gridHelper = new THREE.GridHelper(10, 10);
@@ -68,10 +77,12 @@
 			window.addEventListener('resize', onWindowResize, false);
 			render();
 		}
+
 		function render() {
 			requestAnimationFrame(render);
 			renderer.render(scene, camera);
 		}
+
 		function onWindowResize() {
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();

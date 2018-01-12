@@ -2,15 +2,12 @@
 // Uniforms
 uniform bool isPoints;
 uniform vec2 texSize;
-
-//Kinect params
-uniform float fx;
-uniform float fy;
-uniform float cx;
-uniform float cy;
+uniform float displacement;
 
 // Texture maps
 uniform sampler2D depthMap;
+
+uniform float pointSize;
 
 //Per vertex interpolation passed to the fragment shader
 varying vec2 vUv;
@@ -27,10 +24,13 @@ void main() {
     vec4 texelRead = texture2D(depthMap, uv);
 
     //Calculate the positions
-    vec4 pos = vec4(position.x, position.y, texelRead.a, 1.0);
+    vec4 pos = vec4(position.x,
+                    position.y,
+                    (-texelRead.a) * displacement,
+                    1.0);
 
     if(isPoints){
-        gl_PointSize = 1.0;
+        gl_PointSize = pointSize;
     }
 
     gl_Position = projectionMatrix * modelViewMatrix * pos;

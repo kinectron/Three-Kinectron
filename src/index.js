@@ -1,5 +1,5 @@
 //Import the class
-import KinectGeometry from './kinectronForThree';
+import KinectGeometry from './kinectGeometry';
 
 //If three.js is in the global scope attach it
 if (THREE){

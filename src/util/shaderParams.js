@@ -5,6 +5,10 @@ const ShaderParams = {
     type: "b",
     value: false
   },
+  pointSize: {
+    type: "f",
+    value: 1.0
+  },
   depthMap: {
     type: "t",
     value: null
@@ -13,21 +17,25 @@ const ShaderParams = {
     type: "vec2",
     value: new THREE.Vector2(0, 0)
   },
-  fx: {
+  colorDepthMix: {
     type: "f",
-    value: KinectParams.v2.fx
+    value: 0.0
   },
-  fy: {
+  opacity: {
     type: "f",
-    value: KinectParams.v2.fy
+    value: 1.0
   },
-  cx: {
+  displacement: {
     type: "f",
-    value: KinectParams.v2.cx
+    value: 2.0
   },
-  cy: {
+  brightness: {
     type: "f",
-    value: KinectParams.v2.cy
+    value: 0.0
+  },
+  contrast: {
+    type: "f",
+    value: 1.0
   }
 }
 
