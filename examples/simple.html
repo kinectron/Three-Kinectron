@@ -100,14 +100,7 @@
 
 			window.addEventListener('resize', onWindowResize, false);
 			
-			// Use '9' key to stop kinect from running 
-			window.addEventListener('keydown', function(event){
-				
-				if (event.keyCode === 57) {
-					  kinectron.stopAll();
-				}
-
-			});
+			window.addEventListener('keydown', stopKinectronFeed, false);
 
 			render();
 		}
@@ -115,6 +108,13 @@
 		function drawKinectImg(ktronImg) {
 			kinectronGeo.kinectron.bind(ktronImg.src);
 
+		}
+
+		function stopKinectronFeed() {
+			// Use '9' key to stop kinect from running 
+			if (event.keyCode === 57) {
+				kinectron.stopAll();
+			}
 		}
 
 		function render() {
