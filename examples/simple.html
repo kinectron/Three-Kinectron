@@ -30,7 +30,10 @@
 	<!--Three.js - TODO - swap with hosted versions so example serve from Github pages-->
 	<script src="../node_modules/three/build/three.min.js"></script>
 	<script src="../node_modules/three/examples/js/controls/OrbitControls.js"></script>
+	<script src="../node_modules/three/examples/js/libs/stats.min.js"></script>
 
+
+	<script src="shared/kinectron.bundle.js"></script>
 	<!--DepthKit.js-->
 	<script src="../dist/three.kinectron.js"></script>
 
@@ -39,10 +42,15 @@
 		var renderer,
 				scene,
 				camera,
-				controls;
+				controls,
+				stats;
 
 		//DepthKit character
 		var character;
+
+		//Kinectron
+		var kinectron,
+				kinectronGeo;
 
 		//Kick off the example
 		window.onload = function(){ init(); }
@@ -53,6 +61,17 @@
 			renderer.setPixelRatio(window.devicePixelRatio);
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			document.body.appendChild(renderer.domElement);
+
+			//Setup Kinectron
+			var kinectronIpAddress = "10.0.1.5"; //Add Kinectron IP here
+
+			//Open connection with Kinect
+			kinectron = new Kinectron(kinectronIpAddress);
+			kinectron.makeConnection();
+
+			//Start RGBD feed and set callback
+			kinectron.startRGBD(drawKinectImg);
+
 			// Setup scene
 			scene = new THREE.Scene();
 
@@ -62,7 +81,7 @@
 			camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 			//Create a kinectron geometry instance - First argument takes the rendering type ("wire" / "points" / "mesh")
-			var kinectronGeo = new THREE.KinectGeometry('mesh');
+			kinectronGeo = new THREE.KinectGeometry('mesh');
 
 			//Add it to the scene
 			scene.add(kinectronGeo);
@@ -74,11 +93,33 @@
 			var gridHelper = new THREE.GridHelper(10, 10);
 			scene.add(gridHelper);
 
+			//Add stats
+			stats = new Stats();
+			stats.showPanel(0);
+			document.body.appendChild( stats.dom );
+
 			window.addEventListener('resize', onWindowResize, false);
+			
+			window.addEventListener('keydown', stopKinectronFeed, false);
+
 			render();
 		}
 
+		function drawKinectImg(ktronImg) {
+			kinectronGeo.kinectron.bind(ktronImg.src);
+
+		}
+
+		function stopKinectronFeed() {
+			// Use '9' key to stop kinect from running 
+			if (event.keyCode === 57) {
+				kinectron.stopAll();
+			}
+		}
+
 		function render() {
+			stats.update();
+
 			requestAnimationFrame(render);
 			renderer.render(scene, camera);
 		}
