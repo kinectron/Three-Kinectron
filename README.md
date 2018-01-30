@@ -17,6 +17,15 @@ And then simply add it your Three.js scene:
 scene.add(kinectGeo);
 ```
 
+You would need to also bind the incoming Kinect image to the '''kinectGeo''' instance
+```js
+function onNewKinectFrame(ktronImg) {
+			kinectronGeo.kinectron.bind(ktronImg.src);
+}
+```
+
+For further reference use the [simple example](https://github.com/juniorxsound/Three-Kinectron/blob/master/examples/simple.html)
+
 ### Class methods:
 - ```kinectGeo.setDisplacement(amount)``` - Increase or decrease the amount of displacement on the Z axis (Default value is 1.0).
 - ```kinectGeo.setBrightness(amount)``` - Increase or decrease the brightness of the texture (Default value is 0.0).
@@ -40,3 +49,5 @@ Fork/Clone the repository and ```npm install``` all dependencies
 ### Build system commands:
 - ```npm run start``` uses [concurrently](https://github.com/kimmobrunfeldt/concurrently) to run both an [http-server](https://www.npmjs.com/package/http-server) and a [watchify](https://www.npmjs.com/package/watchify) build opreation on every save to ```dist/kinectron.three.js```.
 - ```npm run build``` builds a minified version of the plugin once and saves it to ```dist/kinectron.three.min.js```
+
+> Written by [juniorxsound](https://github.com/juniorxsound) based on [DepthKit.js](https://github.com/juniorxsound/DepthKit.js) as a part XStory grant in ITP, NYU
