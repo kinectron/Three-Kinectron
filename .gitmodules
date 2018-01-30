@@ -1,0 +1,3 @@
+[submodule "ext/kinectron"]
+	path = ext/kinectron
+	url = https://github.com/kinectron/kinectron.git

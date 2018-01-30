@@ -69,8 +69,8 @@
 			kinectron = new Kinectron(kinectronIpAddress);
 			kinectron.makeConnection();
 
-			//Start RGBD feed and set callback
-			kinectron.startRGBD(drawKinectImg);
+			//Start RGBD feed and set callback for new frames
+			kinectron.startRGBD(onNewKinectFrame);
 
 			// Setup scene
 			scene = new THREE.Scene();
@@ -98,29 +98,35 @@
 			stats.showPanel(0);
 			document.body.appendChild( stats.dom );
 
+			//Add an event listener for window resize
 			window.addEventListener('resize', onWindowResize, false);
-			
-			window.addEventListener('keydown', stopKinectronFeed, false);
+
+			//Add an event listener to key down
+			window.addEventListener('keydown', onKeyDown, false);
 
 			render();
 		}
 
-		function drawKinectImg(ktronImg) {
+		function onNewKinectFrame(ktronImg) {
 			kinectronGeo.kinectron.bind(ktronImg.src);
 
 		}
 
-		function stopKinectronFeed() {
-			// Use '9' key to stop kinect from running 
+		function onKeyDown() {
+			// Use '9' key to stop kinect from running
 			if (event.keyCode === 57) {
 				kinectron.stopAll();
 			}
 		}
 
 		function render() {
+			//Update the FPS counter
 			stats.update();
 
+			//Request the next frame
 			requestAnimationFrame(render);
+
+			//Render
 			renderer.render(scene, camera);
 		}
 
