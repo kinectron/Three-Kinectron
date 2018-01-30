@@ -2,7 +2,7 @@
 A plugin for working with [Kinectron](https://github.com/kinectron/kinectron) streams in [Three.js](https://github.com/mrdoob/three.js)
 1. [Usage](#usage)
 1. [Contribute](#contribute)
-![Kinectron](https://github.com/juniorxsound/Three-Kinectron/blob/master/docs/simple.png)
+![Kinectron](https://github.com/juniorxsound/Three-Kinectron/blob/add_ktron/assets/Screen%20Shot%202018-01-29%20at%208.39.55%20PM.png)
 
 
 ## Usage
