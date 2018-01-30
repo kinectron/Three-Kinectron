@@ -45,7 +45,7 @@ For further reference use the [simple example](https://github.com/juniorxsound/T
 
 
 ## Contribute
-Fork/Clone the repository and ```npm install``` all dependencies
+Fork/Clone the repository, make sure to use the ```--recursive``` flag when you clone to clone submodules too, and ```npm install``` all dependencies
 ### Build system commands:
 - ```npm run start``` uses [concurrently](https://github.com/kimmobrunfeldt/concurrently) to run both an [http-server](https://www.npmjs.com/package/http-server) and a [watchify](https://www.npmjs.com/package/watchify) build opreation on every save to ```dist/kinectron.three.js```.
 - ```npm run build``` builds a minified version of the plugin once and saves it to ```dist/kinectron.three.min.js```
