@@ -41,20 +41,22 @@
 	<script>
 		//Some general Three.js components
 		var renderer,
-				scene,
-				camera,
-				controls,
-				stats;
+			scene,
+			camera,
+			controls,
+			stats;
 
 		//DepthKit character
 		var character;
 
 		//Kinectron
 		var kinectron,
-				kinectronGeo;
+			kinectronGeo;
 
 		//Kick off the example
-		window.onload = function(){ init(); }
+		window.onload = function() {
+			init();
+		}
 
 		function init() {
 			//Setup renderer
@@ -97,7 +99,7 @@
 			//Add stats
 			stats = new Stats();
 			stats.showPanel(0);
-			document.body.appendChild( stats.dom );
+			document.body.appendChild(stats.dom);
 
 			//Add an event listener for window resize
 			window.addEventListener('resize', onWindowResize, false);
