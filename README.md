@@ -20,7 +20,7 @@ scene.add(kinectGeo);
 You would need to also bind the incoming Kinect image to the '''kinectGeo''' instance
 ```js
 function onNewKinectFrame(ktronImg) {
-			kinectronGeo.kinectron.bind(ktronImg.src);
+	kinectronGeo.kinectron.bind(ktronImg.src);
 }
 ```
 
