@@ -8,7 +8,7 @@ A plugin for working with [Kinectron](https://github.com/kinectron/kinectron) st
 ## Usage
 You can create geomtery from the Kinect's depth feed by simply:
 ```js
-var kinectGeo = THREE.KinectronGeometry("mesh");
+const kinectGeo = THREE.KinectGeometry("mesh");
 ```
 You can choose the rendering type by changing the first argument to ```"mesh" / "wire" / "points"```
 
@@ -27,16 +27,23 @@ function onNewKinectFrame(ktronImg) {
 For further reference use the [simple example](https://github.com/juniorxsound/Three-Kinectron/blob/master/examples/simple.html)
 
 ### Class methods:
-- ```kinectGeo.setDisplacement(amount)``` - Increase or decrease the amount of displacement on the Z axis (Default value is 1.0).
-- ```kinectGeo.setBrightness(amount)``` - Increase or decrease the brightness of the texture (Default value is 0.0).
-- ```kinectGeo.setContrast(amount)``` - Increase or decrease the contrast of the texture (Default value is 1.0).
-- ```kinectGeo.setOpacity(opacity)``` - Increase or decrease the opacity of the texture (Default value is 1.0).
-- ```kinectGeo.setPointSize(opacity)``` - Increase or decrease the point size (Only when rendering points, "points").
-- ```kinectGeo.setLineWidth(width)``` - Increase or decrease the line width (Only when rendering wireframe, "wire").
-- ```kinectGeo.pause()``` - Pause the rendering of the Kinectron stream, keeps the last frame.
-- ```kinectGeo.play()``` - Resume the rendering of the Kinectron stream.
-- ```kinectGeo.bind(imageStream)``` - Bind a Kinectron image stream to the material, needs to be called everytime a new frame arrives.
-- ```kinectGeo.update()``` - Calling the update method in the render loop will update the time uniform in the shader.
+
+All class methods are available on the kinectron property of the THREE.KinectGeometry instance
+```js
+const kinectGeo = THREE.KinectGeometry("mesh");
+kinectGeo.kinectron.setDisplacement(30.0);
+```
+
+- ```.setDisplacement(amount)``` - Increase or decrease the amount of displacement on the Z axis (Default value is 1.0).
+- ```.setBrightness(amount)``` - Increase or decrease the brightness of the texture (Default value is 0.0).
+- ```.setContrast(amount)``` - Increase or decrease the contrast of the texture (Default value is 1.0).
+- ```.setOpacity(opacity)``` - Increase or decrease the opacity of the texture (Default value is 1.0).
+- ```.setPointSize(opacity)``` - Increase or decrease the point size (Only when rendering points, "points").
+- ```.setLineWidth(width)``` - Increase or decrease the line width (Only when rendering wireframe, "wire").
+- ```.pause()``` - Pause the rendering of the Kinectron stream, keeps the last frame.
+- ```.play()``` - Resume the rendering of the Kinectron stream.
+- ```.bind(imageStream)``` - Bind a Kinectron image stream to the material, needs to be called everytime a new frame arrives.
+- ```.update()``` - Calling the update method in the render loop will update the time uniform in the shader.
 
 
 
