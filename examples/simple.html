@@ -67,10 +67,15 @@
         document.body.appendChild(renderer.domElement);
 
         //Setup Kinectron
-        var kinectronIpAddress = "10.0.1.5"; //Add Kinectron IP here
+        var kinectronIpAddress = "127.0.0.1"; //Add Kinectron IP here
 
         //Open connection with Kinect
         kinectron = new Kinectron(kinectronIpAddress);
+
+        // Set kinect type to azure
+        kinectron.setKinectType("azure");
+
+        // Connect with application over peer
         kinectron.makeConnection();
 
         //Start RGBD feed and set callback for new frames
