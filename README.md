@@ -1,5 +1,7 @@
 # Kinectron for Three.js
 
+**NOTE! This repo was created with Version 0, which is now unmaintained. It has not been tested with the current Version 1.0.0**
+
 A plugin for working with the [Kinectron](https://github.com/kinectron/kinectron) RGBD stream in [Three.js](https://github.com/mrdoob/three.js)
 
 1. [Usage](#usage)
